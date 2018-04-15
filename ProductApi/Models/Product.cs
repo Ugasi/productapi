@@ -26,7 +26,6 @@ namespace ProductApi.Models {
         [Required]
         public string ProductUrl { get; set; }
 
-        [Required]
         public string ProductImage { get; set; }
     }
 }
