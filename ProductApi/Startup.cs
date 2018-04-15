@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,7 @@ namespace ProductApi {
             services.AddEntityFrameworkNpgsql().AddDbContext<ProductsDbContext>(options => options.UseNpgsql(connectionString));
             services.AddMvc()
                 .AddXmlSerializerFormatters();
+            services.AddApiVersioning(o => o.ApiVersionReader = new MediaTypeApiVersionReader());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -8,7 +8,8 @@ using ProductApi.Data;
 using ProductApi.Models;
 
 namespace ProductApi.Controllers {
-    [Route("api/Products")]
+    [ApiVersion("1.0")]
+    [Route("api/products")]
     public class ProductsController : Controller {
         private const int DefaultPageNumber = 1;
         private const int DefaultPageSize = 10;
