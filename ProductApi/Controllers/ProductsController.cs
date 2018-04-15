@@ -10,7 +10,8 @@ using ProductApi.Models;
 namespace ProductApi.Controllers {
     [Route("api/Products")]
     public class ProductsController : Controller {
-
+        private const int DefaultPageNumber = 1;
+        private const int DefaultPageSize = 10;
         ProductsDbContext productsDbContext;
 
         public ProductsController(ProductsDbContext productsDbContext) {
@@ -18,22 +19,31 @@ namespace ProductApi.Controllers {
         }
 
         [HttpGet]
-        public IActionResult Get(string sortPrice) {
-            IQueryable<Product> products = GetProductsSorted(sortPrice);
-            return StatusCode(StatusCodes.Status200OK, products); ;
+        public IActionResult Get(string sortPrice, int? pageNumber, int? pageSize, string search) {
+            int currentPage = pageNumber ?? DefaultPageNumber;
+            int currentPageSize = pageSize ?? DefaultPageSize;
+            string searchString = search ?? String.Empty;
+            IQueryable<Product> products = GetProductsSorted(sortPrice, searchString);
+            List<Product> pagedItems = products.Skip((currentPage - 1) * currentPageSize).Take(currentPageSize).ToList();
+            return StatusCode(StatusCodes.Status200OK, pagedItems); ;
         }
 
-        private IQueryable<Product> GetProductsSorted(string sortPrice) {
+        private IQueryable<Product> GetProductsSorted(string sortPrice, string search) {
             IQueryable<Product> products;
             switch (sortPrice) {
                 case "desc":
-                    products = productsDbContext.Products.OrderByDescending(p => p.Price);
+                    products = productsDbContext.Products
+                        .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase))
+                        .OrderByDescending(p => p.Price);
                     break;
                 case "asc":
-                    products = productsDbContext.Products.OrderBy(p => p.Price);
+                    products = productsDbContext.Products
+                        .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase))
+                        .OrderBy(p => p.Price);
                     break;
                 default:
-                    products = productsDbContext.Products;
+                    products = productsDbContext.Products
+                        .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase));
                     break;
             }
 
