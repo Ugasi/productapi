@@ -22,5 +22,11 @@ namespace ProductApi.Models {
 
         [Required]
         public string Category { get; set; }
+
+        [Required]
+        public string ProductUrl { get; set; }
+
+        [Required]
+        public string ProductImage { get; set; }
     }
 }
