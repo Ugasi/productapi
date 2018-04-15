@@ -18,8 +18,26 @@ namespace ProductApi.Controllers {
         }
 
         [HttpGet]
-        public IEnumerable<Product> Get() {
-            return productsDbContext.Products;
+        public IActionResult Get(string sortPrice) {
+            IQueryable<Product> products = GetProductsSorted(sortPrice);
+            return StatusCode(StatusCodes.Status200OK, products); ;
+        }
+
+        private IQueryable<Product> GetProductsSorted(string sortPrice) {
+            IQueryable<Product> products;
+            switch (sortPrice) {
+                case "desc":
+                    products = productsDbContext.Products.OrderByDescending(p => p.Price);
+                    break;
+                case "asc":
+                    products = productsDbContext.Products.OrderBy(p => p.Price);
+                    break;
+                default:
+                    products = productsDbContext.Products;
+                    break;
+            }
+
+            return products;
         }
 
         [HttpGet("{id}", Name = "Get")]
@@ -42,11 +60,31 @@ namespace ProductApi.Controllers {
         }
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] Product product) {
-            return StatusCode(StatusCodes.Status204NoContent);
+            if (ModelState.IsValid) {
+                return TryUpdate(id, product);
+            }
+            return StatusCode(StatusCodes.Status400BadRequest);
         }
 
-        [HttpDelete]
+        private IActionResult TryUpdate(int id, Product product) {
+            try {
+                product.Id = id;
+                productsDbContext.Products.Update(product);
+                productsDbContext.SaveChanges(true);
+                return StatusCode(StatusCodes.Status200OK);
+            } catch {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+        }
+
+        [HttpDelete("{id}")]
         public IActionResult Delete(int id) {
+            Product product = productsDbContext.Products.SingleOrDefault(m => m.Id == id);
+            if (product == null) {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+            productsDbContext.Products.Remove(product);
+            productsDbContext.SaveChanges(true);
             return StatusCode(StatusCodes.Status204NoContent);
         }
     }

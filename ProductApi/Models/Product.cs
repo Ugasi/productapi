@@ -10,17 +10,17 @@ namespace ProductApi.Models {
         public int Id { get; set; }
 
         [Required]
-        public string name { get; set; }
+        public string Name { get; set; }
 
         [Required]
-        public double price { get; set; }
+        public double Price { get; set; }
 
-        public string manufacturer { get; set; }
-
-        [Required]
-        public string productCode { get; set; }
+        public string Manufacturer { get; set; }
 
         [Required]
-        public string category { get; set; }
+        public string ProductCode { get; set; }
+
+        [Required]
+        public string Category { get; set; }
     }
 }
