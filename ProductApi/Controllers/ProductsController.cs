@@ -30,25 +30,19 @@ namespace ProductApi.Controllers {
         }
 
         private IQueryable<Product> GetProductsSorted(string sortPrice, string search) {
-            IQueryable<Product> products;
             switch (sortPrice) {
                 case "desc":
-                    products = productsDbContext.Products
+                    return productsDbContext.Products
                         .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase))
                         .OrderByDescending(p => p.Price);
-                    break;
                 case "asc":
-                    products = productsDbContext.Products
+                    return productsDbContext.Products
                         .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase))
                         .OrderBy(p => p.Price);
-                    break;
                 default:
-                    products = productsDbContext.Products
+                    return productsDbContext.Products
                         .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase));
-                    break;
             }
-
-            return products;
         }
 
         [HttpGet("{id}", Name = "Get")]
