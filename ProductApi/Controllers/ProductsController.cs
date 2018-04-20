@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProductApi.Data;
 using ProductApi.Models;
+using ProductApi.Services;
 
 namespace ProductApi.Controllers {
     [ApiVersion("1.0")]
@@ -13,10 +14,10 @@ namespace ProductApi.Controllers {
     public class ProductsController : Controller {
         private const int DefaultPageNumber = 1;
         private const int DefaultPageSize = 10;
-        ProductsDbContext productsDbContext;
+        IProduct productRepository;
 
-        public ProductsController(ProductsDbContext productsDbContext) {
-            this.productsDbContext = productsDbContext;
+        public ProductsController(IProduct productRepository) {
+            this.productRepository = productRepository;
         }
 
         [HttpGet]
@@ -32,22 +33,22 @@ namespace ProductApi.Controllers {
         private IQueryable<Product> GetProductsSorted(string sortPrice, string search) {
             switch (sortPrice) {
                 case "desc":
-                    return productsDbContext.Products
+                    return productRepository.GetProducts()
                         .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase))
                         .OrderByDescending(p => p.Price);
                 case "asc":
-                    return productsDbContext.Products
+                    return productRepository.GetProducts()
                         .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase))
                         .OrderBy(p => p.Price);
                 default:
-                    return productsDbContext.Products
+                    return productRepository.GetProducts()
                         .Where(p => p.Name.StartsWith(search, StringComparison.InvariantCultureIgnoreCase));
             }
         }
 
         [HttpGet("{id}", Name = "Get")]
         public IActionResult Get(int id) {
-            Product product = productsDbContext.Products.SingleOrDefault(m => m.Id == id);
+            Product product = productRepository.GetProduct(id);
             if (product == null) {
                 return StatusCode(StatusCodes.Status404NotFound);
             }
@@ -57,8 +58,7 @@ namespace ProductApi.Controllers {
         [HttpPost]
         public IActionResult Post([FromBody] Product product) {
             if (ModelState.IsValid) {
-                productsDbContext.Products.Add(product);
-                productsDbContext.SaveChanges(true);
+                productRepository.AddProduct(product);
                 return StatusCode(StatusCodes.Status201Created);
             }
             return StatusCode(StatusCodes.Status400BadRequest);
@@ -74,8 +74,7 @@ namespace ProductApi.Controllers {
         private IActionResult TryUpdate(int id, Product product) {
             try {
                 product.Id = id;
-                productsDbContext.Products.Update(product);
-                productsDbContext.SaveChanges(true);
+                productRepository.UpdateProduct(product);
                 return StatusCode(StatusCodes.Status200OK);
             } catch {
                 return StatusCode(StatusCodes.Status404NotFound);
@@ -84,12 +83,7 @@ namespace ProductApi.Controllers {
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id) {
-            Product product = productsDbContext.Products.SingleOrDefault(m => m.Id == id);
-            if (product == null) {
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-            productsDbContext.Products.Remove(product);
-            productsDbContext.SaveChanges(true);
+            productRepository.DeleteProduct(id);
             return StatusCode(StatusCodes.Status204NoContent);
         }
     }

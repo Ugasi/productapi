@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using ProductApi.Data;
+using ProductApi.Services;
 
 namespace ProductApi {
     public class Startup {
@@ -28,6 +29,7 @@ namespace ProductApi {
             services.AddMvc()
                 .AddXmlSerializerFormatters();
             services.AddApiVersioning(o => o.ApiVersionReader = new MediaTypeApiVersionReader());
+            services.AddScoped<IProduct, ProductRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
